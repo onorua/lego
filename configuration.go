@@ -7,9 +7,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/onorua/lego/acmev2"
 	"github.com/urfave/cli"
-	//	"github.com/xenolf/lego/storage"
+	"github.com/xenolf/lego/acmev2"
+	//"github.com/xenolf/lego/storage"
 )
 
 // Configuration type from CLI and config files.

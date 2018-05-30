@@ -6,7 +6,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/onorua/lego/acmev2"
+	"github.com/xenolf/lego/acmev2"
 	"github.com/xenolf/lego/storage"
 )
 
@@ -67,7 +67,7 @@ func NewAccount(email string, conf *Configuration, s storage.StorageProvider) *A
 		}
 
 		acc.Registration = reg
-		acc.Save()
+		acc.Save(s)
 	}
 
 	if acc.conf == nil {

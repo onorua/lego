@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/onorua/lego/acmev2"
 	"github.com/urfave/cli"
+	"github.com/xenolf/lego/acmev2"
 	"github.com/xenolf/lego/providers/dns"
 	"github.com/xenolf/lego/providers/http/memcached"
 	"github.com/xenolf/lego/providers/http/webroot"
@@ -181,16 +181,10 @@ func saveCertRes(certRes acme.CertificateResource, conf *Configuration, storage 
 	}
 }
 
-func handleTOS(c *cli.Context, client *acme.Client, acc *Account, s storage.StorageProvider) {
+func handleTOS(c *cli.Context, client *acme.Client, acc *Account, s storage.StorageProvider) bool {
 	// Check for a global accept override
 	if c.GlobalBool("accept-tos") {
-		err := client.AgreeToTOS()
-		if err != nil {
-			logger().Fatalf("Could not agree to TOS: %s", err.Error())
-		}
-
-		acc.Save(s)
-		return
+		return true
 	}
 
 	reader := bufio.NewReader(os.Stdin)
@@ -252,7 +246,7 @@ func run(c *cli.Context) error {
 	var err error
 	conf, acc, client, storage := setup(c)
 	if acc.Registration == nil {
-		accepted := handleTOS(c, client)
+		accepted := handleTOS(c, client, acc, storage)
 		if !accepted {
 			logger().Fatal("You did not accept the TOS. Unable to proceed.")
 		}
@@ -305,7 +299,6 @@ func run(c *cli.Context) error {
 	}
 
 	var cert *acme.CertificateResource
-	var err error
 
 	if hasDomains {
 		// obtain a certificate, generating a new private key
@@ -328,12 +321,12 @@ func run(c *cli.Context) error {
 		os.Exit(1)
 	}
 
-	err := storage.CheckPath(conf.CertPath())
+	err = storage.CheckPath(conf.CertPath())
 	if err != nil {
 		logger().Fatalf("Could not check/create path: %s", err.Error())
 	}
 
-	saveCertRes(cert, conf, storage)
+	saveCertRes(*cert, conf, storage)
 
 	return nil
 }
@@ -427,7 +420,7 @@ func renew(c *cli.Context) error {
 		logger().Fatalf("%s", err.Error())
 	}
 
-	saveCertRes(newCert, conf, storage)
+	saveCertRes(*newCert, conf, storage)
 
 	return nil
 }
